@@ -1,0 +1,114 @@
+#!/bin/bash
+
+# Minecraft server script
+
+MINECRAFT="minecraft_server.jar"
+MCPATH="/home/minecraft/minecraft_server"
+ARGS="-Xmx2048M -Xms2048M -jar"
+USER="minecraft"
+
+already_running(){
+
+	if pgrep -u $USER -f $MINECRAFT >  /dev/null
+	then
+		return 1
+	else
+		return 0
+	fi
+}
+
+run_as() {
+
+	WHOAMI=`whoami`
+
+	if [ "$WHOAMI" == "$USER" ]
+	then
+		bash -c "$1"
+	else
+		su  - $USER -c "$1"
+	fi
+}
+
+start() {
+
+	already_running
+
+	if [ "$?" == "1" ]  
+	then
+		echo "Minecraft already running ..."
+	else
+		echo "Starting $MINECRAFT ..."
+		run_as "cd $MCPATH && screen -dm -S minecraft java $ARGS $MINECRAFT"
+		sleep 7
+	
+		already_running 
+		if [ "$?" == "1" ]
+		then
+			echo "$MINECRAFT started."
+		else
+			echo "Error, $MINECRAFT could not be started.  Check ${MCPATH}server.log for errors."
+		fi
+
+	fi
+}
+
+stop() {
+
+	already_running
+	if [ "$?" == "1" ]
+	then
+		echo "Stopping $MINECRAFT ... "
+		run_as "screen -p 0 -S minecraft -X stuff \"say SERVER SHUT DOWN IN 5 SECONDS.  SAVING WORLD ...\"$(echo -ne '\015')"
+		run_as "screen -p 0 -S minecraft -X eval 'stuff save-all\015'"
+		sleep 5
+		run_as "screen -p 0 -S minecraft -X eval 'stuff stop\015'"
+		sleep 2
+		already_running
+			if [ "$?" == "1" ]
+			then
+				echo "$MINECRAFT could not be stopped."
+				echo "Check ${MCPATH}server.log for errors."
+			else
+				echo "$MINECRAFT stopped."
+			fi
+	else
+		echo "$MINECRAFT is not running"
+	fi
+}
+
+status() {
+
+	already_running
+	if [ "$?" == "1" ]
+	then
+		echo "$MINECRAFT is running."
+	else
+		echo "$MINECRAFT is not running."
+	fi
+}
+
+case $1 in
+	start)
+		start
+		exit 1
+		;;
+	stop)
+		stop
+		exit 1
+		;;
+	status)
+		status
+		exit 1
+		;;
+	restart)
+		stop
+		start
+		exit 1
+		;;
+	*)
+		echo "Usage: minecraft-server {start|restart|stop}"
+		exit 1
+		;;
+esac
+
+exit 0 
