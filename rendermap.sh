@@ -11,6 +11,7 @@ echo "Disabling saves on the server"
 screen -p 0 -S minecraft -X eval 'stuff save-off\015'
 
 # Copy world directory to temp folder
+echo "Copying world directory to temp folder"
 cp -pr $MINECRAFT_FOLDER/$WORLD $TMP_FOLDER/$WORLD
 
 # Enable Saving
