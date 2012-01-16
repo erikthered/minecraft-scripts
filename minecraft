@@ -1,4 +1,13 @@
 #!/bin/bash
+### BEGIN INIT INFO
+# Provides:          minecraft
+# Required-Start:    $local_fs $remote_fs
+# Required-Stop:     $local_fs $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Minecraft Multiplayer Server
+# Description:       Starts Minecraft server in a screen session. Handles start/stop/restart events.
+### END INIT INFO
 
 # Minecraft server script
 
