@@ -20,7 +20,9 @@ echo "Saves reenabled on the server"
 
 # Run the Overviewer
 echo "Starting render."
+screen -p 0 -S minecraft -X stuff "say Starting map render."$(echo -ne '\015')
 overviewer.py $TMP_FOLDER/$WORLD $OUTPUT
+screen -p 0 -S minecraft -X stuff "say Map render complete."$(echo -ne '\015')
 echo "Rendering complete."
 
 # Cleanup temp files
